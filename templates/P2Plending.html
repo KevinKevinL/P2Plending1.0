@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>P2P Lending DApp</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <h1>P2P Lending Platform</h1>
@@ -51,7 +51,7 @@
         <button onclick="repay()">Repay Loan</button>
     </div>
 
-    <script src="web3.min.js"></script>
-    <script src="app.js"></script>
+    <script src="{{ url_for('static', filename='web3.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>
