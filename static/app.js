@@ -26,9 +26,16 @@ async function registerDepositor() {
 }
 
 async function depositMoney() {
+    console.log("depositMoney function called");
     const accounts = await web3.eth.getAccounts();
     const amount = document.getElementById("deposit-amount").value;
-    await contract.methods.depositMoney(amount).send({ from: accounts[0] });
+    console.log("Deposit Amount:", amount);
+    try {
+        await contract.methods.depositMoney(amount).send({ from: accounts[0] });
+        console.log("Deposit successful");
+    } catch (error) {
+        console.error("Error depositing money:", error);
+    }
 }
 
 async function addBorrowOption() {
