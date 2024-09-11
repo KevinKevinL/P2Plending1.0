@@ -1,13 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 import "./IERC20.sol";
-import "./basic.sol";
-contract Token is Basic{
+import "./ownable.sol";
+contract Token is Ownable{
     //代币合约的地址
     address tokenAddress;
     IERC20 token;
     address collateralTokenAddress;
     IERC20 collateral;
+
+    address public constant WBTC = address(0x29f2D40B0605204364af54EC677bD022dA425d03);
+    address public constant ETH = address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+    address public constant USDC = address(0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8);
+    address public constant USDT = address(0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0);
 
     //设定代币的类型
     function setToken(address _tokenAddress) public onlyOwner {

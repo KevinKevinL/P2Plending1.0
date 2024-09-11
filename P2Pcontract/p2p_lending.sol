@@ -70,26 +70,50 @@ contract P2PLending is Token, Calculator{
     }
 
 
+    //每次最少可存款金额
+    uint minDeposit=0;
+    //代币的兑换比率
+    uint exchangeRate;
+    //设定最少可存款金额
+    function  setMinDeposit(uint _minDeposit) public onlyOwner{
+        minDeposit = _minDeposit;
+    }
 
+    function  seeMinDeposit() public view returns(uint){
+        return minDeposit;
+    }
+
+    function seetokentype() public view returns(IERC20){
+        return token;
+    }
 ///////**************存款人相关函数****************\\\\\\\\\
 
     //存款人初始化
     function registerDepositor() public {
-        require(depositors[msg.sender].depositeAmount == 0, 
-        "Depositor already registered");
+        require(depositors[msg.sender].depositeAmount == 0, "Depositor already registered");
         depositors[msg.sender] = Depositor(0, 0);
     }
 
-    //存钱
-    function depositMoney(uint _amount) public {
-        require(_amount >= minDeposit,
-        "Amount should be greater than minDeposit");
-        //将代币存入合约
-        getTokensFromUser(msg.sender, _amount);
-        //更新存款信息
-        depositors[msg.sender].depositeAmount += _amount;
-        depositors[msg.sender].canLendAmount += _amount;
-    }
+//存钱
+function depositMoney(uint _amount) public {
+    require(minDeposit > 0, "Set minDeposit first!");
+    require(_amount >= minDeposit, "Amount should be greater than minDeposit");
+    
+    // 先进行授权
+    token.approve(msg.sender, _amount);
+    
+    // 然后转移代币到合约
+    token.transferFrom(msg.sender, address(this), _amount);
+
+    // 更新存款信息
+    depositors[msg.sender].depositeAmount += _amount;
+    depositors[msg.sender].canLendAmount += _amount;
+
+    emit Deposit(msg.sender, _amount);
+}
+
+// 定义 Deposit 事件
+event Deposit(address indexed user, uint256 amount);
 
     //增加新借贷条款
     function addBorrowOption(
@@ -120,15 +144,13 @@ contract P2PLending is Token, Calculator{
 
     //借款人初始化
     function registerBorrower() public {
-        require(borrowers[msg.sender].collateralAmount == 0, 
-        "Borrower already registered");
+        require(borrowers[msg.sender].collateralAmount == 0, "Borrower already registered");
         borrowers[msg.sender] = Borrower(0, 0, 0, 0);
     }
 
     //质押
     function depositCollateral(uint256 _amount) public {
-        require(_amount >= minDeposit, 
-        "Amount is too low");
+        require(_amount >= minDeposit, "Amount is too low");
         //往合约里存钱
         getCollateralFromUser(msg.sender, _amount);
         //更新借款信息
@@ -151,8 +173,7 @@ contract P2PLending is Token, Calculator{
        uint256 _index, 
        uint256 _amount
         ) internal view returns (uint) {
-            return (calcCollateralAmount(_amount, borrowOptions[_depositor][_index].collateralRate));
-            //计算质押数量
+            return (calcCollateralAmount(_amount, borrowOptions[_depositor][_index].collateralRate));//计算质押数量
     }
      
     //获取能用的质押数量
@@ -209,8 +230,7 @@ contract P2PLending is Token, Calculator{
         require(borrowRecords[msg.sender][_index].isActive,
         "This credit is not Active!");
         //还差多少没还
-        uint leftAmount = borrowRecords[msg.sender][_index].amount - 
-                            borrowRecords[msg.sender][_index].repaidAmount;
+        uint leftAmount = borrowRecords[msg.sender][_index].amount - borrowRecords[msg.sender][_index].repaidAmount;
         //借了多久，用来计算利率
         uint timePastsBy = block.timestamp - borrowRecords[msg.sender][_index].startedTime;
         //每秒利率
