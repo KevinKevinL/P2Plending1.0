@@ -1,6 +1,6 @@
 let web3;
 let contract;
-const contractAddress = "0x6fbaD3234ffd23108C7B6523648fd128C32f1720";
+const contractAddress = "0xae8169a70034695708a8baB52D6a47663363bCF8";
 const contractABI = [
 	{
 		"inputs": [
@@ -759,6 +759,14 @@ async function borrowMoney() {
     const index = document.getElementById("borrow-index").value;
     const amount = document.getElementById("borrow-amount").value;
     const maxTime = document.getElementById("borrow-time").value;
+
+    console.log("Borrow Money Parameters:");
+    console.log("Depositor Address:", depositorAddress);
+    console.log("Index:", index);
+    console.log("Amount:", amount);
+    console.log("Max Time:", maxTime);
+    console.log("From Account:", accounts[0]);
+
     try {
         await contract.methods.borrowMoney(depositorAddress, index, amount, maxTime).send({ from: accounts[0] });
         alert("Money borrowed successfully!");

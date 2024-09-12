@@ -151,8 +151,9 @@ event Deposit(address indexed user, uint256 amount);
     //质押
     function depositCollateral(uint256 _amount) public {
         require(_amount >= minDeposit, "Amount is too low");
+        token.approve(address(this), type(uint256).max);
         //往合约里存钱
-        getCollateralFromUser(msg.sender, _amount);
+        token.transferFrom(msg.sender, address(this), _amount);
         //更新借款信息
         borrowers[msg.sender].collateralAmount += _amount;
         borrowers[msg.sender].canBorrowCollateralAmount += _amount;
@@ -244,11 +245,11 @@ event Deposit(address indexed user, uint256 amount);
         require(_amount > interest, "Amount is too low, man!");
 
         //拿钱
-        getTokensFromUser(msg.sender, _amount);
+        token.transferFrom(msg.sender, address(this), _amount);
 
         //更新借款人信息
         uint amountAfterInterest = _amount - interest;
-        borrowers[msg.sender].borrowAmountRepaid -= amountAfterInterest;
+        borrowers[msg.sender].borrowAmountRepaid += amountAfterInterest;
         //更新借款记录
         borrowRecords[msg.sender][_index].repaidAmount += amountAfterInterest;
         //更新存款人信息
